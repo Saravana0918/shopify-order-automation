@@ -11,23 +11,23 @@ router.post("/order-update", async (req, res) => {
   console.log("Tags:", tags);
 
   if(tags.includes("design done")){
-    sendTemplate(order,"order_update_design");
+    sendTemplate(order,"order_update_design_v3");
   }
 
   if(tags.includes("printing done")){
-    sendTemplate(order,"order_update_printing");
+    sendTemplate(order,"order_update_printing_v3");
   }
 
   if(tags.includes("fusing done")){
-    sendTemplate(order,"order_update_fusing");
+    sendTemplate(order,"order_update_fusing_v3");
   }
 
   if(tags.includes("stitching done")){
-    sendTemplate(order,"order_update_stitching");
+    sendTemplate(order,"order_update_stitching_v3");
   }
 
   if(tags.includes("packing done")){
-    sendTemplate(order,"order_update_packing");
+    sendTemplate(order,"order_update_packing_v3");
   }
 
   res.sendStatus(200);
@@ -40,12 +40,19 @@ async function sendTemplate(order, templateName){
 
   try{
 
-    const phone = order.shipping_address.phone;
+    const phone = order.shipping_address?.phone;
 
     const customerName =
       order.customer?.first_name ||
       order.shipping_address?.first_name ||
       "Customer";
+
+    const orderId = order.name || order.id; // #1234
+
+    if(!phone){
+      console.log("No phone number found");
+      return;
+    }
 
     await axios.post(
       process.env.WHATSAPP_API_URL,
@@ -56,7 +63,8 @@ async function sendTemplate(order, templateName){
           name: templateName,
           languageCode: "en",
           bodyValues: [
-            customerName
+            customerName,
+            orderId
           ]
         }
       },
@@ -68,13 +76,13 @@ async function sendTemplate(order, templateName){
       }
     );
 
-    console.log("Template sent:", templateName);
+    console.log("✅ Template sent:", templateName);
 
   }
   catch(err){
 
     console.log(
-      "WhatsApp error",
+      "❌ WhatsApp error",
       err.response?.data || err.message
     );
 
