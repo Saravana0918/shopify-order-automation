@@ -40,7 +40,15 @@ async function sendTemplate(order, templateName){
 
   try{
 
-    const phone = order.shipping_address?.phone;
+    const rawPhone = order.shipping_address?.phone || "";
+
+// clean phone
+let phone = rawPhone.replace(/\D/g, "");
+
+// add India code
+if(phone.length === 10){
+  phone = "91" + phone;
+}
 
     const customerName =
       order.customer?.first_name ||
