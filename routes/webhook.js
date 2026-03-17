@@ -42,29 +42,28 @@ async function sendTemplate(order, templateName){
 
     const rawPhone = order.shipping_address?.phone || "";
 
-// clean phone
-let phone = rawPhone.replace(/\D/g, "");
+    // clean phone
+    let phone = rawPhone.replace(/\D/g, "");
 
-// add India code
-if(phone.length === 10){
-  phone = "91" + phone;
-}
+    // take last 10 digits
+    phone = phone.slice(-10);
 
     const customerName =
       order.customer?.first_name ||
       order.shipping_address?.first_name ||
       "Customer";
 
-    const orderId = order.name || order.id; // #1234
+    const orderId = order.name || order.id;
 
     if(!phone){
-      console.log("No phone number found");
+      console.log("No valid phone");
       return;
     }
 
     await axios.post(
       process.env.WHATSAPP_API_URL,
       {
+        countryCode: "91",
         phoneNumber: phone,
         type: "Template",
         template: {
