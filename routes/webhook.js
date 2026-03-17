@@ -10,39 +10,36 @@ router.post("/order-update", async (req, res) => {
   console.log("Order ID:", order.id);
   console.log("Tags:", tags);
 
-  if(tags.includes("design done")){
-    sendTemplate(order,"order_update_design_v3");
-  }
-
-  if(tags.includes("printing done")){
-    sendTemplate(order,"order_update_printing_v3");
-  }
-
-  if(tags.includes("fusing done")){
-    sendTemplate(order,"order_update_fusing_v3");
-  }
-
-  if(tags.includes("stitching done")){
-    sendTemplate(order,"order_update_stitching_v3");
-  }
-
+  // ✅ IMPORTANT: Latest stage priority logic
   if(tags.includes("packing done")){
-    sendTemplate(order,"order_update_packing_v3");
+    await sendTemplate(order,"order_update_packing_v3");
+  }
+  else if(tags.includes("stitching done")){
+    await sendTemplate(order,"order_update_stitching_v3");
+  }
+  else if(tags.includes("fusing done")){
+    await sendTemplate(order,"order_update_fusing_v3");
+  }
+  else if(tags.includes("printing done")){
+    await sendTemplate(order,"order_update_printing_v3");
+  }
+  else if(tags.includes("design done")){
+    await sendTemplate(order,"order_update_design_v3");
   }
 
   res.sendStatus(200);
-
 });
 
 
 
+// 🔥 FINAL WORKING FUNCTION
 async function sendTemplate(order, templateName){
 
   try{
 
     const rawPhone = order.shipping_address?.phone || "";
 
-    // clean phone
+    // clean phone (remove spaces, +, -)
     let phone = rawPhone.replace(/\D/g, "");
 
     // take last 10 digits
@@ -56,7 +53,7 @@ async function sendTemplate(order, templateName){
     const orderId = order.name || order.id;
 
     if(!phone){
-      console.log("No valid phone");
+      console.log("❌ No valid phone number");
       return;
     }
 
@@ -94,7 +91,6 @@ async function sendTemplate(order, templateName){
     );
 
   }
-
 }
 
 module.exports = router;
